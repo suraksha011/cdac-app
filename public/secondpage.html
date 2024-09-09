@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Options Page</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+        }
+        .options-container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 500px;
+            text-align: center;
+        }
+        h2 {
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #333;
+        }
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        button {
+            width: 45%;
+            padding: 15px;
+            background-color: #007BFF;
+            border: none;
+            color: white;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="options-container">
+        <h2>Choose an Option</h2>
+        <div class="buttons">
+            <button id="textMining">Text Mining</button>
+            <button id="webScraping">Web Scraping</button>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("textMining").addEventListener("click", function() {
+            alert("You selected Text Mining!");
+            window.location.href = "TextMiningPage.html"; // Navigation to text mining page
+        });
+
+        document.getElementById("webScraping").addEventListener("click", function() {
+            alert("You selected Web Scraping!");
+            window.location.href = "WebScrapingPage.html"; // Navigation to web scraping page
+        });
+    </script>
+
+</body>
+</html>
