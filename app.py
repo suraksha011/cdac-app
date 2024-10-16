@@ -17,7 +17,6 @@ import seaborn as sns
 nltk_data_path = os.path.expanduser('~') + '/nltk_data'
 nltk.data.path.append(nltk_data_path)
 
-print("nltk_data_path is : ", nltk_data_path)
 
 # Ensure necessary packages are downloaded
 nltk.download('tagsets_json')
