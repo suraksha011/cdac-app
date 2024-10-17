@@ -17,7 +17,11 @@ import seaborn as sns
 nltk_data_path = os.path.expanduser('~') + '/nltk_data'
 nltk.data.path.append(nltk_data_path)
 
+
 # Ensure necessary packages are downloaded
+nltk.download('tagsets_json')
+nltk.download('averaged_perceptron_tagger_eng') 
+nltk.download('punkt_tab')
 nltk.download('punkt', download_dir=nltk_data_path)
 nltk.download('wordnet', download_dir=nltk_data_path)
 nltk.download('averaged_perceptron_tagger', download_dir=nltk_data_path)
