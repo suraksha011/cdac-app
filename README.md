@@ -1,4 +1,4 @@
 # cdac-app
 commands to run the project-
-.\env\Scrpits\activate
+.\env\Scripts\activate
 streamlit run main.py
