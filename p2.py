@@ -1,166 +1,73 @@
-import streamlit as st
-import pandas as pd
-from textblob import TextBlob
-from nltk.tokenize import word_tokenize, sent_tokenize
-from nltk.stem import WordNetLemmatizer, PorterStemmer
-from nltk import pos_tag
-from collections import Counter
-from bs4 import BeautifulSoup
-import requests
 import nltk
-import os
+import re
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer
+from nltk.tokenize import sent_tokenize
+from textblob import TextBlob
+import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import streamlit as st
+# Make sure to download necessary NLTK datasets (first-time usage)
+nltk.download('punkt')
+nltk.download('stopwords')
 
-
-# Explicitly set the NLTK data path to where the downloaded resources are located
-nltk_data_path = os.path.expanduser('~') + '/nltk_data'
-nltk.data.path.append(nltk_data_path)
-
-
-# Ensure necessary packages are downloaded
-nltk.download('tagsets_json')
-nltk.download('averaged_perceptron_tagger_eng') 
-nltk.download('punkt_tab')
-nltk.download('punkt', download_dir=nltk_data_path)
-nltk.download('wordnet', download_dir=nltk_data_path)
-nltk.download('averaged_perceptron_tagger', download_dir=nltk_data_path)
-nltk.download('stopwords', download_dir=nltk_data_path)
-
-# Page Configuration
-# st.set_page_config(page_title="AI Text Mining & Web Scraping", layout="centered")
-
-# Function to process text from .txt file or .csv file
-def load_file(file):
-    if file.name.endswith(".txt"):
-        return file.read().decode("utf-8")
-    elif file.name.endswith(".csv"):
-        df = pd.read_csv(file)
-        # Combine all text columns into one for processing
-        text = df.apply(lambda row: ' '.join(row.values.astype(str)), axis=1)
-        return ' '.join(text)
-    else:
-        st.error("Unsupported file format!")
-        return None
-
-# Page 1 - File Upload
-def upload_file_page():
-    st.title("AI Text Mining & Web Scraping")
-    
-    st.markdown("""<style>
-    .title {font-size: 36px; font-weight: bold; color: #4CAF50; text-align: center;}
-    .upload-box {display: flex; justify-content: center; align-items: center; padding: 20px; border: 2px dashed #4CAF50; background-color: #f9f9f9; border-radius: 10px; cursor: pointer;}
-    .buttons {display: flex; justify-content: center; gap: 10px;}
-    .button {padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; text-align: center;}
-    </style>""", unsafe_allow_html=True)
-
-    st.markdown("<h1 class='title'>Upload Your Text or CSV File</h1>", unsafe_allow_html=True)
-
-    uploaded_file = st.file_uploader("Choose a text (.txt) or CSV (.csv) file", type=["txt", "csv"])
-
-    if uploaded_file is not None:
-        # Process the file and save the content
-        file_content = load_file(uploaded_file)
-        if file_content:
-            st.session_state["file_content"] = file_content
-            st.success("File uploaded successfully! Click 'Proceed' to go to the next page.")
-        
-        # Proceed to the next page
-        if st.button("Proceed"):
-            st.session_state["page"] = "process"
-
-# Page 2 - Text Mining & Web Scraping Options
-def process_file_page():
-    st.title("AI-Based Text Mining & Web Scraping")
-
-    st.markdown("""<style>
-    .page-title {font-size: 32px; font-weight: bold; text-align: center; color: #FF5722;}
-    .buttons {display: flex; justify-content: center; gap: 10px; margin-top: 20px;}
-    .button {padding: 10px 20px; background-color: #FF5722; color: white; border: none; border-radius: 5px; cursor: pointer;}
-    </style>""", unsafe_allow_html=True)
-
-    st.markdown("<h1 class='page-title'>Choose a Task</h1>", unsafe_allow_html=True)
-
-    if "file_content" not in st.session_state:
-        st.error("No file uploaded. Please go back and upload a file.")
-        return
-
-    # Define button actions in correct sequence
-    if st.button("Tokenization"):
-        perform_tokenization(st.session_state["file_content"])
-
-    if st.button("POS Tagging"):
-        perform_pos_tagging(st.session_state["file_content"])
-
-    if st.button("Lemmatization"):
-        perform_lemmatization(st.session_state["file_content"])
-
-    if st.button("Word Frequency"):
-        perform_word_frequency(st.session_state["file_content"])
-
-    if st.button("Stopword Removal"):
-        perform_stopword_removal(st.session_state["file_content"])
-
-    if st.button("Stemming"):
-        perform_stemming(st.session_state["file_content"])
-
-    if st.button("Sentiment Analysis"):
-       perform_sentiment_analysis(st.session_state["file_content"])
- 
-    # if st.button("Web Scraping"):
-    #     perform_web_scraping()
-
-# Tokenization Function
+# Function for Tokenization
 def perform_tokenization(text):
-    st.subheader("Tokenization Result")
+    # Tokenizes the input text into individual words
     tokens = word_tokenize(text)
-    st.write("Tokens:")
-    st.write(tokens)
+    return ', '.join(tokens)  # Output as a comma-separated list
 
-# POS Tagging Function
+# Function for POS Tagging
 def perform_pos_tagging(text):
-    st.subheader("POS Tagging Result")
+    # Tokenizes the input text and tags each word with its part of speech
     tokens = word_tokenize(text)
-    pos_tags = pos_tag(tokens)
-    st.write("POS Tags:")
-    st.write(pos_tags)
+    tagged = nltk.pos_tag(tokens)
+    # Convert to DataFrame for better visual presentation
+    tagged_df = pd.DataFrame(tagged, columns=["Word", "POS"])
+    return tagged_df
 
-# Lemmatization Function
+# Function for Lemmatization
 def perform_lemmatization(text):
-    st.subheader("Lemmatization Result")
-    lemmatizer = WordNetLemmatizer()
+    # Lemmatizes the input text by reducing words to their root form
+    lemmatizer = nltk.WordNetLemmatizer()
     tokens = word_tokenize(text)
-    lemmatized_tokens = [lemmatizer.lemmatize(token) for token in tokens]
-    st.write("Lemmatized Tokens:")
-    st.write(lemmatized_tokens)
+    lemmatized = [lemmatizer.lemmatize(word) for word in tokens]
+    return ', '.join(lemmatized)  # Output as a comma-separated list
 
-# Stopword Removal Function
+# Function for Word Frequency
+def perform_word_frequency(text):
+    # Tokenizes the input text and calculates the frequency distribution of words
+    tokens = word_tokenize(text)
+    frequency = nltk.FreqDist(tokens)
+    # Convert frequency distribution to a DataFrame for plotting
+    freq_df = pd.DataFrame(frequency.items(), columns=["Word", "Frequency"])
+    # Plotting the word frequency as a bar chart
+    plt.figure(figsize=(10, 6))
+    sns.barplot(x="Word", y="Frequency", data=freq_df.sort_values(by="Frequency", ascending=False).head(10))
+    plt.title("Top 10 Word Frequency")
+    plt.xticks(rotation=45)
+    plt.show()
+    return freq_df
+
+# Function for Stopword Removal
 def perform_stopword_removal(text):
-    st.subheader("Stopword Removal Result")
-    stop_words = set(nltk.corpus.stopwords.words("english"))
+    # Removes common stopwords like "the", "a", etc. from the text
+    stop_words = set(stopwords.words("english"))
     tokens = word_tokenize(text)
-    filtered_tokens = [w for w in tokens if w.lower() not in stop_words]
-    st.write("Filtered Tokens:")
-    st.write(filtered_tokens)
+    filtered_text = [word for word in tokens if word.lower() not in stop_words]
+    return ' '.join(filtered_text)  # Output as a space-separated string
 
-# Stemming Function
+# Function for Stemming
 def perform_stemming(text):
-    st.subheader("Stemming Result")
+    # Reduces words to their stem (root) form using the Porter Stemmer
     ps = PorterStemmer()
     tokens = word_tokenize(text)
-    stemmed_words = [ps.stem(w) for w in tokens]
-    st.write("Stemmed Words:")
-    st.write(stemmed_words)
+    stemmed = [ps.stem(word) for word in tokens]
+    return ', '.join(stemmed)  # Output as a comma-separated list
 
-# Word Frequency Function
-def perform_word_frequency(text):
-    st.subheader("Word Frequency Result")
-    tokens = word_tokenize(text)
-    word_freq = Counter(tokens)
-    st.write("Word Frequency:")
-    st.write(word_freq)
-
-# Sentiment Analysis Function with Pie Chart and Countplot
+# Function for Sentiment Analysis
 def perform_sentiment_analysis(text):
     st.subheader("Sentiment Analysis Result")
     
@@ -211,65 +118,14 @@ def perform_sentiment_analysis(text):
     sns.countplot(x=sentiment_labels, palette=colors, ax=ax)
     ax.set_title('Count of Sentiment Categories')
     st.pyplot(fig)
-    
-    # Word Count Plot
-    # tokens = word_tokenize(text)
-    # word_count = len(tokens)
-    
-    # Display word count
-    # st.write(f"Total Word Count: {word_count}")
-    
-    # Barplot of word count
-    # fig, ax = plt.subplots()
-    # sns.barplot(x=['Word Count'], y=[word_count], ax=ax)
-    # ax.set_title('Word Count')
-    # st.pyplot(fig)
-    
-# Web Scraping Function 
 
-# def perform_web_scraping():
-#     st.subheader("Web Scraping")
-
-#     # URL input from the user
-#     url = st.text_input("Enter a URL to scrape", "https://en.wikipedia.org/wiki/Web_scraping")
-
-#     # Button to trigger scraping
-#     if st.button("Scrape"):
-#         if url:
-#             try:
-#                 response = requests.get(url)
-#                 if response.status_code == 200:
-#                     soup = BeautifulSoup(response.content, 'html.parser')
-#                     st.write("Web page content scraped successfully!")
-                    
-#                     # Extract and display the title and all paragraphs
-#                     page_title = soup.title.string if soup.title else "No title found"
-#                     st.write(f"### Page Title: {page_title}")
-                    
-#                     # Extract paragraphs
-#                     paragraphs = soup.find_all('p')
-#                     for p in paragraphs:
-#                         st.write(p.get_text())
-                        
-#                 else:
-#                     st.error("Failed to retrieve the web page.")
-#             except Exception as e:
-#                 st.error(f"An error occurred: {e}")
-#         else:
-#             st.error("Please enter a valid URL.")
-
-# # Page 3 - Web Scraping Results
-# def web_scraping_page():
-#     st.title("Web Scraping Results")
-#     perform_web_scraping()
-
-# Main logic to determine which page to show
-if "page" not in st.session_state:
-    st.session_state["page"] = "upload"
-
-if st.session_state["page"] == "upload":
-    upload_file_page()
-elif st.session_state["page"] == "process":
-    process_file_page()
-# elif st.session_state["page"] == "web_scraping":
-#     web_scraping_page()
+# Function for Word Cloud Generation (Optional extra)
+def generate_word_cloud(text):
+    from wordcloud import WordCloud
+    # Generates a word cloud from the text
+    wordcloud = WordCloud(width=800, height=400, background_color='white').generate(text)
+    plt.figure(figsize=(10, 5))
+    plt.imshow(wordcloud, interpolation='bilinear')
+    plt.axis("off")
+    plt.show()
+    return wordcloud
