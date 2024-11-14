@@ -1,185 +1,176 @@
-# main.py - Full Implementation Styled According to Design Document
+# main.py
+
 import streamlit as st
-import random  # Import random module for displaying random facts
-from p1 import get_scraped_content  # Import web scraping function
-from p2 import (  # Import text mining functions
-    load_file, perform_tokenization, perform_pos_tagging, perform_lemmatization, 
-    perform_word_frequency, perform_stopword_removal, perform_stemming, 
+from p1 import get_scraped_content, create_excel_file
+from p2 import (
+    perform_tokenization, perform_pos_tagging, perform_lemmatization,
+    perform_word_frequency, perform_stopword_removal, perform_stemming,
     perform_sentiment_analysis
 )
 
-# Set page configuration
-# st.set_page_config(page_title="AI-Based Text Mining & Web Scraping", layout="wide")
+# Page Configurations
+# st.set_page_config(page_title="AI Text Mining & Web Scraping", layout="centered")
 
-# Page Content
-st.markdown("<h1 style='text-align: center; color: #4CAF50;'>AI-Based Text Mining and Web Scraping</h1>", unsafe_allow_html=True)
-
-# Custom CSS Styling
+# Custom CSS for background color and styling
 st.markdown("""
     <style>
-    /* Global Title */
-    .title {
-        font-size: 36px;
-        color: #4CAF50;
-        font-weight: bold;
-        text-align: center;
-        margin-bottom: 30px;
-    }
-    /* Section Titles */
-    .section-title {
-        font-size: 30px;
-        color: #FF5722;
-        font-weight: bold;
-        text-align: center;
-        margin-top: 20px;
-    }
-    /* Upload and URL input boxes */
-    .upload-box, .url-input-box {
-        display: flex;
-        justify-content: center;
-        padding: 20px;
-        border: 2px dashed #4CAF50;
-        background-color: #f9f9f9;
-        border-radius: 10px;
-        cursor: pointer;
-        text-align: center;
-    }
-    /* Button Row */
-    .button-row {
-        display: flex;
-        justify-content: center;
-        gap: 15px;
-        margin-top: 20px;
-        flex-wrap: wrap;
-    }
-    /* Task Buttons */
-    .task-button {
-        padding: 10px 20px;
-        background-color: #4CAF50;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        font-weight: bold;
-        cursor: pointer;
-        text-align: center;
-        width: 180px;
-        margin-bottom: 10px;
-    }
-    /* Results Area */
-    .results {
-        margin-top: 20px;
-        padding-top: 10px;
-        border-top: 2px solid #4CAF50;
-    }
+        /* Apply background color */
+        body {
+            background-color: #f6e0b5;  /* Light Pastel Yellow */
+            font-family: 'Roboto', sans-serif;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        .main-title {
+            font-size: 48px;
+            color: #4a4a4a;
+            text-align: center;
+            font-weight: 700;
+            margin-top: 50px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-title {
+            font-size: 28px;
+            color: #ff6f61;  /* Pastel Coral */
+            text-align: center;
+            font-weight: 600;
+            margin-top: 30px;
+        }
+
+        .description {
+            font-size: 18px;
+            color: #6b6b6b;
+            text-align: center;
+            margin-top: 10px;
+            padding: 0 20px;
+        }
+
+        .container {
+            margin: 0 auto;
+            width: 80%;
+            max-width: 1200px;
+        }
+
+        /* Custom styles for buttons */
+        .operation-button {
+            display: inline-block;
+            padding: 12px 24px;
+            margin: 5px;
+            background-color: #ff6f61;
+            color: white;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+
+        .operation-button:hover {
+            background-color: #ff3b2d;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
     </style>
-    """, unsafe_allow_html=True)
+""", unsafe_allow_html=True)
 
-# Random Facts about AI-based Text Mining and Web Scraping
-random_facts = [
-    "Text mining is a process of deriving high-quality information from text.",
-    "Web scraping can be used to extract data from websites for various purposes, including price comparison and data analysis.",
-    "AI-driven text mining can automate the extraction of insights from large volumes of text data.",
-    "Natural Language Processing (NLP) is a key component of text mining that helps computers understand human language.",
-    "Web scraping is often used in market research to gather data on competitors and market trends.",
-    "Text mining techniques can be used in sentiment analysis to gauge public opinion from social media data.",
-    "Web scraping can help researchers gather data for academic studies or reports without manual data entry.",
-    "With proper tools, web scraping can extract information from various formats, including HTML, XML, and JSON."
-]
+# Home Page Title
+st.markdown("<h1 class='main-title'>AI Text Mining & Web Scraping</h1>", unsafe_allow_html=True)
 
-# Sidebar Navigation
-st.sidebar.header("Navigation")
-if "page" not in st.session_state:
-    st.session_state["page"] = "home"  # Default to Home
+# Description
+st.markdown("<p class='description'>An AI-powered tool for efficient web scraping and advanced text mining tasks.</p>", unsafe_allow_html=True)
 
-# Navigation Buttons
-if st.sidebar.button("Text Mining"):
-    st.session_state["page"] = "text_mining"
-if st.sidebar.button("Web Scraping"):
-    st.session_state["page"] = "web_scraping"
+# Sidebar for Navigation
+option = st.sidebar.selectbox(
+    'Choose a Module:',
+    ['Home', 'Web Scraping', 'Text Mining']
+)
 
-# Homepage Section with Random Facts
-if st.session_state["page"] == "home":
-    st.markdown("<h2 class='title'>Welcome to AI-Based Text Mining and Web Scraping</h2>", unsafe_allow_html=True)
-    st.markdown("<h3 class='section-title'>Did You Know?</h3>", unsafe_allow_html=True)
-    # Display a random fact
-    st.write(random.choice(random_facts))
+# Show Home Page if the 'Home' option is selected
+if option == 'Home':
+    st.markdown("<h2 class='section-title'>Welcome to AI Text Mining & Web Scraping</h2>", unsafe_allow_html=True)
+    st.markdown("<p class='description'>This platform offers advanced tools for text mining and web scraping. Please choose a module from the sidebar to get started.</p>", unsafe_allow_html=True)
 
-# Text Mining Section
-if st.session_state["page"] == "text_mining":
-    st.markdown("<h2 class='title'>TEXT MINING</h2>", unsafe_allow_html=True)
+# Show Web Scraping Page
+elif option == 'Web Scraping':
+    st.markdown("<h2 class='section-title'>Web Scraping Module</h2>", unsafe_allow_html=True)
     
-    # File Upload Section
-    st.markdown("<div class='upload-box'>Upload Your File (Supported Formats: .csv, .txt)</div>", unsafe_allow_html=True)
-    uploaded_file = st.file_uploader("", type=["csv", "txt"])
-
-    if uploaded_file is not None:
-        file_content = load_file(uploaded_file)
-        if file_content:
-            st.session_state["file_content"] = file_content
-            st.success("File uploaded successfully!")
-
-            # "Proceed" button to navigate to the next page
-            if st.button("Proceed"):
-                st.session_state["show_processing_options"] = True
-                st.session_state["page"] = "processing_options"  # Navigate to processing options
-
-# Processing Options Section
-elif st.session_state.get("page") == "processing_options":
-    st.markdown("<h2 class='title'>PROCESSING OPTIONS</h2>", unsafe_allow_html=True)
-
-    # Check if the file content exists
-    if "file_content" in st.session_state:
-        st.markdown("<h3 class='section-title'>Choose a Processing Task</h3>", unsafe_allow_html=True)
-        
-        # Display processing task buttons in a structured row format
-        col1, col2, col3 = st.columns(3)
-
-        # Task Buttons
-        with col1:
-            if st.button("Tokenization", key="tokenize"):
-                st.markdown("<div class='results'><b>Result:</b></div>", unsafe_allow_html=True)
-                perform_tokenization(st.session_state["file_content"])
-            if st.button("Stopword Removal", key="stopwords"):
-                st.markdown("<div class='results'><b>Result:</b></div>", unsafe_allow_html=True)
-                perform_stopword_removal(st.session_state["file_content"])
-        
-        with col2:
-            if st.button("POS Tagging", key="pos"):
-                st.markdown("<div class='results'><b>Result:</b></div>", unsafe_allow_html=True)
-                perform_pos_tagging(st.session_state["file_content"])
-            if st.button("Word Frequency", key="frequency"):
-                st.markdown("<div class='results'><b>Result:</b></div>", unsafe_allow_html=True)
-                perform_word_frequency(st.session_state["file_content"])
-
-        with col3:
-            if st.button("Lemmatization", key="lemma"):
-                st.markdown("<div class='results'><b>Result:</b></div>", unsafe_allow_html=True)
-                perform_lemmatization(st.session_state["file_content"])
-            if st.button("Sentiment Analysis", key="sentiment"):
-                st.markdown("<div class='results'><b>Result:</b></div>", unsafe_allow_html=True)
-                perform_sentiment_analysis(st.session_state["file_content"])
-        
-        if st.button("Stemming", key="stem"):
-            st.markdown("<div class='results'><b>Result:</b></div>", unsafe_allow_html=True)
-            perform_stemming(st.session_state["file_content"])
-    else:
-        st.error("Please upload a file in the Text Mining section first.")
-
-# Web Scraping Section
-elif st.session_state["page"] == "web_scraping":
-    st.markdown("<h2 class='title'>WEB SCRAPING</h2>", unsafe_allow_html=True)
-
-    # URL Input for Web Scraping
-    st.markdown("<div class='url-input-box'>Enter the URL</div>", unsafe_allow_html=True)
-    url = st.text_input("", placeholder="https://example.com")
-
-    # Scrape Button
+    # URL input for scraping
+    url = st.text_input("Enter a URL to scrape", "https://example.com")
     if st.button("Scrape"):
         if url:
-            page_title, paragraphs = get_scraped_content(url)
-            st.markdown("<div class='results'><b>Topic:</b></div>", unsafe_allow_html=True)
-            st.write(page_title)
-            st.markdown("<div class='results'><b>First 200 Words:</b></div>", unsafe_allow_html=True)
-            st.write(" ".join(paragraphs[:200]))  # Display first 200 words
+            title, paragraphs = get_scraped_content(url)
+            if title and paragraphs:
+                st.write(f"### Page Title: {title}")
+                for para in paragraphs:
+                    st.write(para)
+                
+                # Option to download scraped data as Excel
+                excel_data = create_excel_file(title, paragraphs)
+                st.download_button(
+                    label="Download as Excel",
+                    data=excel_data,
+                    file_name="scraped_data.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                )
+            else:
+                st.error("Failed to retrieve content from the URL.")
         else:
             st.error("Please enter a valid URL.")
+
+# Show Text Mining Page
+elif option == 'Text Mining':
+    st.markdown("<h2 class='section-title'>Text Mining Module</h2>", unsafe_allow_html=True)
+    
+    uploaded_file = st.file_uploader("Choose a text (.txt) or CSV (.csv) file", type=["txt", "csv"])
+    if uploaded_file:
+        file_content = uploaded_file.read().decode("utf-8")
+        st.session_state["file_content"] = file_content
+        st.success("File uploaded successfully!")
+
+        # Buttons to trigger text mining operations
+        st.markdown("<div class='button-container'>", unsafe_allow_html=True)
+
+        if st.button("Tokenization"):
+            result = perform_tokenization(file_content)
+            st.subheader("Tokenized Text:")
+            st.write(result)
+
+        if st.button("POS Tagging"):
+            result = perform_pos_tagging(file_content)
+            st.subheader("POS Tagged Text:")
+            st.write(result)
+
+        if st.button("Lemmatization"):
+            result = perform_lemmatization(file_content)
+            st.subheader("Lemmatized Text:")
+            st.write(result)
+
+        if st.button("Word Frequency"):
+            result = perform_word_frequency(file_content)
+            st.subheader("Word Frequency Analysis:")
+            st.write(result)
+
+        if st.button("Stopword Removal"):
+            result = perform_stopword_removal(file_content)
+            st.subheader("Text After Stopword Removal:")
+            st.write(result)
+
+        if st.button("Stemming"):
+            result = perform_stemming(file_content)
+            st.subheader("Stemmed Text:")
+            st.write(result)
+
+        if st.button("Sentiment Analysis"):
+            result = perform_sentiment_analysis(file_content)
+            st.subheader("Sentiment Analysis Results:")
+            st.write(result)
+        
+        st.markdown("</div>", unsafe_allow_html=True)
