@@ -13,6 +13,46 @@ import streamlit as st
 nltk.download('punkt')
 nltk.download('stopwords')
 
+# POS tag abbreviations and their full forms
+pos_abbreviations = {
+    'CC': 'Coordinating conjunction',
+    'CD': 'Cardinal number',
+    'DT': 'Determiner',
+    'EX': 'Existential there',
+    'FW': 'Foreign word',
+    'IN': 'Preposition or subordinating conjunction',
+    'JJ': 'Adjective',
+    'JJR': 'Adjective, comparative',
+    'JJS': 'Adjective, superlative',
+    'LS': 'List item marker',
+    'MD': 'Modal',
+    'NN': 'Noun, singular or mass',
+    'NNS': 'Noun, plural',
+    'NNP': 'Proper noun, singular',
+    'NNPS': 'Proper noun, plural',
+    'PDT': 'Predeterminer',
+    'POS': 'Possessive ending',
+    'PRP': 'Personal pronoun',
+    'PRP$': 'Possessive pronoun',
+    'RB': 'Adverb',
+    'RBR': 'Adverb, comparative',
+    'RBS': 'Adverb, superlative',
+    'RP': 'Particle',
+    'SYM': 'Symbol',
+    'TO': 'To',
+    'UH': 'Interjection',
+    'VB': 'Verb, base form',
+    'VBD': 'Verb, past tense',
+    'VBG': 'Verb, gerund or present participle',
+    'VBN': 'Verb, past participle',
+    'VBP': 'Verb, non-3rd person singular present',
+    'VBZ': 'Verb, 3rd person singular present',
+    'WDT': 'Wh-determiner',
+    'WP': 'Wh-pronoun',
+    'WP$': 'Possessive wh-pronoun',
+    'WRB': 'Wh-adverb'
+}
+
 # Function for Tokenization
 def perform_tokenization(text):
     # Tokenizes the input text into individual words
@@ -24,8 +64,29 @@ def perform_pos_tagging(text):
     # Tokenizes the input text and tags each word with its part of speech
     tokens = word_tokenize(text)
     tagged = nltk.pos_tag(tokens)
+    
     # Convert to DataFrame for better visual presentation
     tagged_df = pd.DataFrame(tagged, columns=["Word", "POS"])
+    
+    # Display the full form of each POS tag abbreviation
+    pos_info = "\n".join([f"{key}: {value}" for key, value in pos_abbreviations.items()])
+    
+    st.text_area("POS Tag Abbreviations (Full Forms)", pos_info, height=300)
+
+    # Calculate POS tag distribution
+    pos_counts = tagged_df['POS'].value_counts()
+
+    # Limit to top 10 POS tags
+    top_10_pos_counts = pos_counts.head(10)
+
+    # Plot the distribution as a pie chart
+    st.text_area("Pie Chart Distribution of Top 10 POS: ", height=30)
+
+    fig, ax = plt.subplots(figsize=(8, 8))
+    ax.pie(top_10_pos_counts, labels=top_10_pos_counts.index, autopct='%1.1f%%', startangle=90, colors=sns.color_palette("Set3", len(top_10_pos_counts)))
+    ax.axis('equal')  # Equal aspect ratio ensures that pie chart is drawn as a circle.
+    st.pyplot(fig)
+
     return tagged_df
 
 # Function for Lemmatization
