@@ -12,35 +12,39 @@ from p2 import (
 # st.set_page_config(page_title="AI Text Mining & Web Scraping", layout="centered")
 
 # Custom CSS for background color and styling
-st.markdown("""
+st.markdown(
+    """
     <style>
-        /* Apply background color */
-        body {
-            background-color: #f6e0b5;  /* Light Pastel Yellow */
+        /* General Styling */
+        .stApp {
+            background-color: #F9F9F9;  /* Very Light Gray Background */
             font-family: 'Roboto', sans-serif;
-            color: #333;
-            margin: 0;
+            color: #333333;  /* Dark Text Color */
             padding: 0;
+            margin: 0;
         }
 
-        .main-title {
+        /* Title Styling */
+        .stTitle {
             font-size: 48px;
-            color: #4a4a4a;
+            color: #FFB6B9;  /* Light Coral */
             text-align: center;
             font-weight: 700;
             margin-top: 50px;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
         }
 
-        .section-title {
+        /* Subheader Styling */
+        .stSubheader {
             font-size: 28px;
-            color: #ff6f61;  /* Pastel Coral */
+            color: #D4E6F1;  /* Soft Light Blue */
             text-align: center;
             font-weight: 600;
             margin-top: 30px;
         }
 
-        .description {
+        /* Markdown/Text Styling */
+        .stMarkdown {
             font-size: 18px;
             color: #6b6b6b;
             text-align: center;
@@ -48,38 +52,79 @@ st.markdown("""
             padding: 0 20px;
         }
 
-        .container {
+        /* Container Styling */
+        .stContainer {
             margin: 0 auto;
             width: 80%;
             max-width: 1200px;
         }
 
-        /* Custom styles for buttons */
-        .operation-button {
-            display: inline-block;
+        /* Button Styling */
+        .stButton > button {
             padding: 12px 24px;
             margin: 5px;
-            background-color: #ff6f61;
+            background-color: #FFB6B9;  /* Light Coral */
             color: white;
             font-size: 16px;
             border: none;
             cursor: pointer;
             border-radius: 8px;
             transition: background-color 0.3s;
+            width: 250px;
+            height: 40px;
         }
 
-        .operation-button:hover {
-            background-color: #ff3b2d;
+        /* Button Hover Styling */
+        .stButton > button:hover {
+            background-color: #F7E1C3;  /* Soft Peach */
         }
 
-        .button-container {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            flex-wrap: wrap;
+        # /* Button Container Styling */
+        # .stButton > div {
+        #     display: flex;
+        #     justify-content: center;
+        #     gap: 10px;
+        #     # flex-wrap: wrap;
+        # }
+
+        /* Section Styling */
+        .section-background {
+            background-color: #FFFFFF;  /* White */
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        /* Alternate Section Styling */
+        .alternate-background {
+            background-color: #D4E6F1;  /* Soft Light Blue */
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        /* Content Card Styling */
+        .card {
+            background-color: #FFFFFF;  /* White */
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+
+        /* Description Box */
+        .description-box {
+            background-color: #FFB6B9;  /* Light Coral */
+            border: 1px solid #F7E1C3;  /* Soft Peach */
+            padding: 15px;
+            border-radius: 8px;
+            color: #333333;
         }
     </style>
-""", unsafe_allow_html=True)
+    """,
+    unsafe_allow_html=True
+)
+
 
 # Home Page Title
 st.markdown("<h1 class='main-title'>AI Text Mining & Web Scraping</h1>", unsafe_allow_html=True)
@@ -88,9 +133,9 @@ st.markdown("<h1 class='main-title'>AI Text Mining & Web Scraping</h1>", unsafe_
 st.markdown("<p class='description'>An AI-powered tool for efficient web scraping and advanced text mining tasks.</p>", unsafe_allow_html=True)
 
 # Sidebar for Navigation
-option = st.sidebar.selectbox(
+option = st.sidebar.radio(
     'Choose a Module:',
-    ['Home', 'Web Scraping', 'Text Mining']
+    ['HomePage', 'Web Scraping', 'Text Mining']
 )
 
 # Show Home Page if the 'Home' option is selected
@@ -108,10 +153,6 @@ elif option == 'Web Scraping':
         if url:
             title, paragraphs = get_scraped_content(url)
             if title and paragraphs:
-                st.write(f"### Page Title: {title}")
-                for para in paragraphs:
-                    st.write(para)
-                
                 # Option to download scraped data as Excel
                 excel_data = create_excel_file(title, paragraphs)
                 st.download_button(
@@ -120,6 +161,11 @@ elif option == 'Web Scraping':
                     file_name="scraped_data.xlsx",
                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 )
+                #Scrpaed data
+                st.write(f"### Page Title: {title}")
+                for para in paragraphs:
+                    st.write(para)
+                
             else:
                 st.error("Failed to retrieve content from the URL.")
         else:
@@ -130,47 +176,65 @@ elif option == 'Text Mining':
     st.markdown("<h2 class='section-title'>Text Mining Module</h2>", unsafe_allow_html=True)
     
     uploaded_file = st.file_uploader("Choose a text (.txt) or CSV (.csv) file", type=["txt", "csv"])
+    
     if uploaded_file:
         file_content = uploaded_file.read().decode("utf-8")
         st.session_state["file_content"] = file_content
         st.success("File uploaded successfully!")
 
-        # Buttons to trigger text mining operations
-        st.markdown("<div class='button-container'>", unsafe_allow_html=True)
+    # Display buttons after the file is uploaded
+    buttons = ["Tokenization", "POS Tagging", "Lemmatization", "Word Frequency", "Stopword Removal", "Stemming", "Sentiment Analysis"]
 
-        if st.button("Tokenization"):
-            result = perform_tokenization(file_content)
-            st.subheader("Tokenized Text:")
-            st.write(result)
+    if 'file_content' in st.session_state:
+        # Display buttons only after file is uploaded
+        button_col = st.columns(len(buttons))
 
-        if st.button("POS Tagging"):
-            result = perform_pos_tagging(file_content)
-            st.subheader("POS Tagged Text:")
-            st.write(result)
+        for i, button in enumerate(buttons):
+            with button_col[i]:
+                # When a button is clicked, update the selected action
+                if st.button(button, key=f"button_{i}", help=f"Perform {button} on the uploaded text"):
+                    st.session_state.selected_action = button
 
-        if st.button("Lemmatization"):
-            result = perform_lemmatization(file_content)
-            st.subheader("Lemmatized Text:")
-            st.write(result)
+    # Create an empty placeholder for dynamic output
+    output_placeholder = st.empty()
 
-        if st.button("Word Frequency"):
-            result = perform_word_frequency(file_content)
-            st.subheader("Word Frequency Analysis:")
-            st.write(result)
+    # Perform the selected action and update the placeholder dynamically
+    if 'selected_action' in st.session_state:
+        action = st.session_state.selected_action
+        st.session_state.selected_action = action  # Ensure the action stays in session state
 
-        if st.button("Stopword Removal"):
-            result = perform_stopword_removal(file_content)
-            st.subheader("Text After Stopword Removal:")
-            st.write(result)
+        with output_placeholder.container():  # Use the container to update dynamically
+            if action == "Tokenization":
+                result = perform_tokenization(file_content)
+                st.subheader("Tokenized Text:")
+                st.write(result)
 
-        if st.button("Stemming"):
-            result = perform_stemming(file_content)
-            st.subheader("Stemmed Text:")
-            st.write(result)
+            elif action == "POS Tagging":
+                result = perform_pos_tagging(file_content)
+                st.subheader("POS Tagged Text:")
+                st.write(result)
 
-        if st.button("Sentiment Analysis"):
-            result = perform_sentiment_analysis(file_content)
-            st.subheader("Sentiment Analysis Results:")
-            st.write(result)
-        
-        st.markdown("</div>", unsafe_allow_html=True)
+            elif action == "Lemmatization":
+                result = perform_lemmatization(file_content)
+                st.subheader("Lemmatized Text:")
+                st.write(result)
+
+            elif action == "Word Frequency":
+                result = perform_word_frequency(file_content)
+                st.subheader("Word Frequency Analysis:")
+                st.write(result)
+
+            elif action == "Stopword Removal":
+                result = perform_stopword_removal(file_content)
+                st.subheader("Text After Stopword Removal:")
+                st.write(result)
+
+            elif action == "Stemming":
+                result = perform_stemming(file_content)
+                st.subheader("Stemmed Text:")
+                st.write(result)
+
+            elif action == "Sentiment Analysis":
+                result = perform_sentiment_analysis(file_content)
+                # st.subheader("Sentiment Analysis Results:")
+                st.write(result)
