@@ -1,5 +1,7 @@
+from typing_extensions import Buffer
 import nltk
 import re
+import io
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
@@ -12,6 +14,23 @@ import streamlit as st
 # Make sure to download necessary NLTK datasets (first-time usage)
 nltk.download('punkt')
 nltk.download('stopwords')
+
+def create_download_button(df, file_name, button_label):
+    # Convert the DataFrame to an Excel buffer
+    buffer = io.BytesIO()
+    with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
+        df.to_excel(writer, index=False, sheet_name='Sheet1')
+        writer.save()
+        
+    buffer.seek(0)
+
+    # Create a download button in Streamlit
+    st.download_button(
+        label=button_label,
+        data=buffer,
+        file_name=file_name,
+        mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
 
 # POS tag abbreviations and their full forms
 pos_abbreviations = {
@@ -57,13 +76,17 @@ pos_abbreviations = {
 def perform_tokenization(text):
     # Tokenizes the input text into individual words
     tokens = word_tokenize(text)
-    return ', '.join(tokens)  # Output as a comma-separated list
+    tokenized_df = pd.DataFrame(tokens, columns=["Tokens"])
+    return tokenized_df
+    create_download_button(tokenized_df, "tokenized_output.xlsx", "Download Tokenized Data as Excel")
+
 
 # Function for POS Tagging
 def perform_pos_tagging(text):
     # Tokenizes the input text and tags each word with its part of speech
     tokens = word_tokenize(text)
     tagged = nltk.pos_tag(tokens)
+
     
     # Convert to DataFrame for better visual presentation
     tagged_df = pd.DataFrame(tagged, columns=["Word", "POS"])
@@ -88,6 +111,8 @@ def perform_pos_tagging(text):
     st.pyplot(fig)
 
     return tagged_df
+    create_download_button(tagged_df, "pos_tagged_output.xlsx", "Download POS-Tagged Data as Excel")
+
 
 # Function for Lemmatization
 def perform_lemmatization(text):
@@ -95,7 +120,9 @@ def perform_lemmatization(text):
     lemmatizer = nltk.WordNetLemmatizer()
     tokens = word_tokenize(text)
     lemmatized = [lemmatizer.lemmatize(word) for word in tokens]
-    return ', '.join(lemmatized)  # Output as a comma-separated list
+    lemmatized_df = pd.DataFrame({"Original Word": tokens, "Lemmatized Word": lemmatized})
+    return lemmatized_df
+    create_download_button(lemmatized_df, "lemmatized_output.xlsx", "Download Lemmatized Data as Excel")
 
 # Function for Word Frequency
 def perform_word_frequency(text):
@@ -111,14 +138,22 @@ def perform_word_frequency(text):
     plt.xticks(rotation=45)
     plt.show()
     return freq_df
+    create_download_button(freq_df, "word_frequency_output.xlsx", "Download Word Frequency Data as Excel")
 
 # Function for Stopword Removal
 def perform_stopword_removal(text):
     # Removes common stopwords like "the", "a", etc. from the text
     stop_words = set(stopwords.words("english"))
     tokens = word_tokenize(text)
-    filtered_text = [word for word in tokens if word.lower() not in stop_words]
-    return ' '.join(filtered_text)  # Output as a space-separated string
+    filtered_words = [word for word in tokens if word.lower() not in stop_words]
+    
+    # Create a pandas DataFrame with original words and filtered words
+    stopword_removal_df = pd.DataFrame({
+        "Original Word": tokens,
+        "Filtered Word": [word if word.lower() not in stop_words else "" for word in tokens] # Output as a space-separated string
+    })
+    return stopword_removal_df
+    create_download_button(stopword_removal_df, "stopword_removal_output.xlsx", "Download Stopword Removal Data as Excel")
 
 # Function for Stemming
 def perform_stemming(text):
@@ -126,7 +161,12 @@ def perform_stemming(text):
     ps = PorterStemmer()
     tokens = word_tokenize(text)
     stemmed = [ps.stem(word) for word in tokens]
-    return ', '.join(stemmed)  # Output as a comma-separated list
+    stemming_df = pd.DataFrame({
+        "Original Word": tokens,
+        "Stemmed Word": stemmed
+    })
+    return stemming_df
+    create_download_button(stemming_df, "stemming_output.xlsx", "Download Stemming Data as Excel")
 
 # Function for Sentiment Analysis
 def perform_sentiment_analysis(text):
