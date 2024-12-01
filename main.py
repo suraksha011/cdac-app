@@ -148,7 +148,7 @@ elif option == 'Web Scraping':
     st.markdown("<h2 class='section-title'>Web Scraping Module</h2>", unsafe_allow_html=True)
     
     # URL input for scraping
-    url = st.text_input("Enter a URL to scrape", "https://example.com")
+    url = st.text_input("Enter a URL to scrape", placeholder="https://example.com")
     if st.button("Scrape"):
         if url:
             title, paragraphs = get_scraped_content(url)
